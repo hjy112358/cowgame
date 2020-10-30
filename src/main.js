@@ -1,11 +1,11 @@
 import Vue from 'vue'
 import App from './App'
 
-// import judgeCards from '@/util/judgeCards.js'
+import judgeCards from '@/util/judgeCards.js'
 import remFn from './util/rem.js'
 
 Vue.config.productionTip = false
-// Vue.prototype.hintCards = hintCards
+Vue.prototype.judgeCards = judgeCards
 Vue.prototype.remFn = remFn
 
 
