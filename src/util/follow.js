@@ -15,41 +15,51 @@
 function follow(lastype, yourtype) {
 	console.log(lastype);
 	console.log(yourtype)
+
 	// 牌型一致
 	if(lastype.cardKind==yourtype.cardKind){
-		var last=lastype.cardSort;
-		var yours=yourtype.cardSort;
+		var last=sortCard(lastype.cardSort);
+		var yours=sortCard(yourtype.cardSort);
+		console.log(last)
+		console.log(yours)
+		
 		if(lastype.kindvalue==6){
-			if(lastype.sumkids==yourtype.sumkids){
+			if(parseInt(lastype.sumkids)==parseInt(yourtype.sumkids)){
 				// 比谁更小
 				for(var i=0;i<last.length;i++){
-					if(last[i].cardValue<yours[i].cardValue && last[i].cardColor<yours[i].cardColor){
+					if(parseInt(last[i].cardValue)<parseInt(yours[i].cardValue) && parseInt(last[i].cardColor)<parseInt(yours[i].cardColor)){
 						return true;
 					}
 				}
 			}else{
-				return (lastype.sumkids<yourtype.sumkids)
+				return (parseInt(lastype.sumkids)<parseInt(yourtype.sumkids))
 			}
-			
 		}else{
-			for(var i=0;i<last.length;i++){
-				if(last[i].cardValue>yours[i].cardValue && last[i].cardColor>yours[i].cardColor){
+			// for(var i=0;i<last.length;i++){
+				if(parseInt(last[0].cardValue)>parseInt(yours[0].cardValue) ){
+					// console.log('不一样')
+					// console.log(last[i])
+					// console.log(yours[i])
+					return true;
+				}else  if(parseInt(last[0].cardValue)==parseInt(yours[0].cardValue)&&parseInt(last[0].cardColor)>parseInt(yours[0].cardColor)){
+					// console.log('一样')
+					// console.log(last[i])
+					// console.log(yours[i])
 					return true;
 				}
-			}
+			// }
 		}
-		
 		return false;
 	}else{
 	// 牌型不一致
 		if(lastype.kindvalue&&yourtype.kindvalue){
-			if(lastype.kindvalue==yourtype.kindvalue){
+			if(parseInt(lastype.kindvalue)==parseInt(yourtype.kindvalue)){
 				var last=lastype.cardKind;
 				var your=yourtype.cardKind;
-				return (last.substr(last.length-1,1)>your.substr(your.length-1,1))
+				return (parseInt(last.substr(last.length-1,1))>parseInt(your.substr(your.length-1,1)))
 				
 			}else{
-				return (lastype.kindvalue>yourtype.kindvalue)
+				return (parseInt(lastype.kindvalue)>parseInt(yourtype.kindvalue))
 			}
 		}else{
 			if(lastype.kindvalue){
@@ -64,6 +74,29 @@ function follow(lastype, yourtype) {
 
 
 
+// 排序
+function sortCard(arr) {
+	var min;
+	for (var i = 0; i < arr.length - 1; i++) {
+		for (var j = i + 1; j < arr.length; j++) {
+			if (parseInt(arr[i].cardValue) < parseInt(arr[j].cardValue)) {
+				min = arr[j];
+				arr[j] = arr[i];
+				arr[i] = min;
+			}
+		}
+	}
+	for (var i = 0; i < arr.length - 1; i++) {
+		for (var j = i + 1; j < arr.length; j++) {
+			if (parseInt(arr[i].cardValue) == parseInt(arr[j].cardValue) && parseInt(arr[i].cardColor) < parseInt(arr[j].cardColor)) {
+				min = arr[j];
+				arr[j] = arr[i];
+				arr[i] = min;
+			}
+		}
+	}
+	return arr;
+}
 
 
 export default follow

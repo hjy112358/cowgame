@@ -12,8 +12,8 @@
 //  五小>五花>四炸>牛牛>牛数（9～1）>无牛
 //  五花>五小>四炸>牛牛>牛数（9～1）>无牛
 function judgeCards(objArr) {
-	// var arr = objArr.concat();
-	var soracrd = sortCard(objArr);
+	var arr = objArr.concat();
+	var soracrd = sortCard(arr);
 	var returnmsg = {
 		status: false,
 		cardKind: null,
@@ -22,25 +22,25 @@ function judgeCards(objArr) {
 	};
 	var isflower = is5flower(soracrd);
 	if (isflower.status) {
-		console.log('is5flower')
-		// 五花 都是JQK  cowFlower   kindvalue:5
+		// console.log('is5flower')
+		// 五花 都是JQK  cowFlower   kindvalue:6
 		returnmsg = isflower
 	} else {
 		var ismall = is5small(soracrd)
 		if (ismall.status) {
-			console.log('is5small')
-			// 五小 5张牌点数加起来小于10 ，每张牌都在5以下 cowSmall   kindvalue:6
+			// console.log('is5small')
+			// 五小 5张牌点数加起来小于10 ，每张牌都在5以下 cowSmall   kindvalue:5
 			returnmsg = ismall
 		} else {
 			var isBoom = isboom(soracrd);
 			if (isBoom.status) {
-				console.log('isboom')
+				// console.log('isboom')
 				// 四炸 有四张一样的牌不需要判别有没有牛  cowBoom kindvalue:4
 				returnmsg = isBoom
 			} else {
 				var iscow = cowNum(soracrd);
 				if (iscow.status) {
-					console.log('cowNum')
+					// console.log('cowNum')
 					// 无牛 任意三张牌和不是10的整数倍    null kindvalue:1
 					// 有牛1-9 任意三张牌和是10的整数倍，另外两张的和不是，则用另外两张和的个位数作为牛数 牛数 cow+数  kindvalue:2
 					// 牛牛 任意三张牌的和是10的整数倍，另外两张的和也是   iscow  kindvalue:3
@@ -53,7 +53,7 @@ function judgeCards(objArr) {
 }
 
 // 是否有牛
-function cowNum(objarr) {
+function cowNum1(objarr) {
 	var arr = objarr.concat();
 	var sum = 0;
 	var sumold = 0;
@@ -71,8 +71,11 @@ function cowNum(objarr) {
 		sum = sumold;
 		for (var j = i + 1; j < arr.length - 1; j++) {
 			for (var k = j + 1; k < arr.length; k++) {
-				if ((arr[i].cardNum + arr[j].cardNum + arr[k].cardNum) % 10 == 0) {
-					sum = sum - (arr[i].cardNum + arr[j].cardNum + arr[k].cardNum);
+				if ((parseInt(arr[i].cardNum) + parseInt(arr[j].cardNum) + parseInt(arr[k].cardNum)) % 10 == 0) {
+					console.log(arr[i])
+					console.log(arr[j])
+					console.log(arr[k])
+					sum = parseInt(sum) - (parseInt(arr[i].cardNum) + parseInt(arr[j].cardNum) + parseInt(arr[k].cardNum));
 					var groupChild = [arr[i], arr[j], arr[k], sum];
 					group.push(groupChild)
 				}
@@ -120,7 +123,7 @@ function cowNum(objarr) {
 }
 
 // 是否有牛
-function cowNum1(objarr) {
+function cowNum(objarr) {
 	var arr = objarr.concat();
 	var sum = 0;
 	var returnmsg = {
@@ -130,13 +133,16 @@ function cowNum1(objarr) {
 		kindvalue: null
 	};
 	for (var i = 0; i < arr.length; i++) {
-		sum += arr[i].cardNum
+		sum = parseInt(arr[i].cardNum)+parseInt(sum)
 	}
 	for (var i = 0; i < arr.length - 2; i++) {
 		for (var j = i + 1; j < arr.length - 1; j++) {
 			for (var k = j + 1; k < arr.length; k++) {
-				if ((arr[i].cardNum + arr[j].cardNum + arr[k].cardNum) % 10 == 0) {
-					sum = sum - (arr[i].cardNum + arr[j].cardNum + arr[k].cardNum);
+				if ((parseInt(arr[i].cardNum) + parseInt(arr[j].cardNum) + parseInt(arr[k].cardNum)) % 10 == 0) {
+					console.log(arr[i])
+					console.log(arr[j])
+					console.log(arr[k])
+					sum = parseInt(sum) - (parseInt(arr[i].cardNum) + parseInt(arr[j].cardNum) + parseInt(arr[k].cardNum));
 					var changeorder = changesort(arr, [i, j, k])
 					if (sum % 10 == 0) {
 						returnmsg = {
@@ -222,7 +228,7 @@ function is5flower(objarr) {
 		status: true,
 		cardKind: 'cowFlower',
 		cardSort: arr,
-		kindvalue: 5
+		kindvalue: 6
 	};
 	return returnmsg
 }
@@ -241,7 +247,7 @@ function is5small(objarr) {
 		if (arr[i].cardNum > 5) {
 			return returnmsg
 		} else {
-			sum += arr[i].cardNum;
+			sum = parseInt(sum)+parseInt(arr[i].cardNum);
 		}
 	}
 	if (sum < 10) {
@@ -249,7 +255,7 @@ function is5small(objarr) {
 			status: true,
 			cardKind: 'cowSmall',
 			cardSort: arr,
-			kindvalue: 6,
+			kindvalue: 5,
 			sumkids: sum
 		};
 	}
@@ -283,8 +289,8 @@ function sortCard(arr) {
 }
 
 // 根据牌型排序
-function changesort(arr, checkarr) {
-	console.log(arr);
+function changesort1(arr, checkarr) {
+	// console.log(arr);
 	console.log(checkarr)
 	// arr 原数组
 	// checkarr 特殊牌
@@ -304,6 +310,8 @@ function changesort(arr, checkarr) {
 	}
 	newarr = sortCard(newarr);
 	arr = sortCard(arr);
+	console.log(newarr)
+	console.log(arr)
 	var newreturn = newarr.concat(arr);
 	for (var i = 0; i < newreturn.length - 1; i++) {
 		for (var j = i + 1; j < newreturn.length; j++) {
@@ -314,6 +322,29 @@ function changesort(arr, checkarr) {
 			}
 		}
 	}
+	return newreturn
+}
+
+function changesort(arr, checkarr) {
+	// // console.log(arr);
+	// console.log(checkarr)
+	// arr 原数组
+	// checkarr 特殊牌index 
+	var newarr = [];
+	for (var k = 0; k < checkarr.length; k++) {
+		newarr.push(arr[checkarr[k]])
+	}
+	for (var j = 0; j < newarr.length; j++) {
+		for (var k = 0; k < arr.length; k++) {
+			if (arr[k].cardValue == newarr[j].cardValue && arr[k].cardColor == newarr[j].cardColor) {
+				arr.splice(k, 1)
+			}
+		}
+	}
+	newarr = sortCard(newarr);
+	arr = sortCard(arr);
+	var newreturn = newarr.concat(arr);
+
 	return newreturn
 }
 
@@ -328,7 +359,7 @@ function changesortBoom(arr, which) {
 			last.push(arr[i])
 		}
 	}
-	console.log(newarr)
+	// console.log(newarr)
 	var newreturn = newarr.concat(last);
 	return newreturn
 }

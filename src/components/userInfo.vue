@@ -12,7 +12,7 @@
     <div class="info" v-if="usermsg">
       <p>
         <!-- <i class="user"></i> -->
-        <span>{{ usermsg.seatId}}-{{ usermsg.userId}}-{{ usermsg.nickName }}</span>
+        <span>{{ usermsg.nickName }}</span>
       </p>
       <p class="doup">
         <!-- <i class="dou"></i> -->
