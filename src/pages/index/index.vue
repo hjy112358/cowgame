@@ -3,7 +3,7 @@
     <!-- <view class="test">
       <p>{{userID}}</p>
       <p>{{seatId}}</p>
-    </view> -->
+    </view>-->
     <!-- 返回 -->
     <view class="back" @tap="exitRoomFn()">
       <img src="../../static/image/back.png" />
@@ -59,7 +59,7 @@
           ></UserInfo>
         </div>
         <div v-else>
-          <UserInfo :usermsg="item"  :key="userInfokey"></UserInfo>
+          <UserInfo :usermsg="item" :key="userInfokey"></UserInfo>
         </div>
 
         <!-- 我的豆子显示区域 -->
@@ -153,9 +153,9 @@
       <p>底分:{{bottomScore}}</p>
     </div>
     <!-- 翻牌 -->
-    <div class="optionsbox " v-show="isFlop" @tap="flop(showCardsList[4])">
+    <div class="optionsbox" v-show="isFlop" @tap="flop(showCardsList[4])">
       <!--  -->
-      <div class="btnlist ">
+      <div class="btnlist">
         <button class="flopbtn">开牌({{ floptime }}s)</button>
       </div>
     </div>
@@ -178,7 +178,7 @@
       <button v-for="(key,index) in doublelist" :key="index" @tap="chooseB(key)">{{key}}倍</button>
     </div>
     <!-- 下注-->
-    <div class="bet" v-if="betbtn" >
+    <div class="bet" v-if="betbtn">
       <!-- -->
       <!--  -->
       <button
@@ -188,7 +188,7 @@
         @tap="chooseBet(key)"
       >{{key}}分</button>
       <button @tap="editSelf()" v-show="!showEditself">自定义</button>
-      <view  class="flex alignitem-center editselfbtn" v-if="showEditself">
+      <view class="flex alignitem-center editselfbtn" v-if="showEditself">
         <!--  -->
         <view class="rowBox mrg50T">
           <view class="sliderBox">
@@ -310,8 +310,8 @@ export default {
       // 开牌
       flaps: [], //存放下注的用户id
       flapClist: [], //记录下注详情
-      floptime:10,//开牌时间
-      floptimer:null,//开牌定时器名字
+      floptime: 10, //开牌时间
+      floptimer: null, //开牌定时器名字
 
       // 输赢
       winLose: [], //记录输赢
@@ -329,7 +329,11 @@ export default {
       isLiveMode: true, //是否即时刷新数值，默认true
       step: 10, //步长值
       sum: 0, //选择的自定义下注分
-      showEditself: false //显示自定义滑块
+      showEditself: false, //显示自定义滑块
+
+      // 音频
+      audio: null,
+      mp3: "/static/f.mp3" //发牌
     };
   },
   components: {
@@ -343,8 +347,8 @@ export default {
   },
   mounted() {
     // 从原生获取
-      window.getUserInfo = this.getUserInfo;
-      window.exitRoomFn = this.exitRoomFn;
+    window.getUserInfo = this.getUserInfo;
+    window.exitRoomFn = this.exitRoomFn;
     this.getUserInfo();
   },
   filters: {
@@ -433,7 +437,15 @@ export default {
               if (bankerindex == -1) {
                 this.bankers.push(msgRes.data.uid);
                 var which = this.getseat(msgRes.data.uid, false);
-
+                if (msgRes.data.type == -1) {
+                  var myaudio = new Audio();
+                  myaudio.src = "/static/audio/nobanker.mp3";
+                  myaudio.play();
+                } else {
+                  var myaudio = new Audio();
+                  myaudio.src = "/static/audio/banker.mp3";
+                  myaudio.play();
+                }
                 // console.log(which, this.bankerClist);
                 this.bankerClist[which].type = msgRes.data.type;
                 this.bankerClist[which].hint = msgRes.data.hint;
@@ -474,6 +486,94 @@ export default {
               let flapindex = this.flaps.indexOf(msgRes.data.uid);
               if (flapindex == -1) {
                 this.flaps.push(msgRes.data.uid);
+                console.log(msgRes.data.audioname);
+                switch (msgRes.data.audioname) {
+                  // 无牛
+                  case "nocows":
+                    var myaudio = new Audio();
+                    myaudio.src = "/static/audio/nocows.mp3";
+                    myaudio.play();
+                    break;
+                  // 五花
+                  case "is5flower":
+                    var myaudio = new Audio();
+                    myaudio.src = "/static/audio/is5flower.mp3";
+                    myaudio.play();
+                    break;
+                  // 五小
+                  case "is5small":
+                    var myaudio = new Audio();
+                    myaudio.src = "/static/audio/is5small.mp3";
+                    myaudio.play();
+                    break;
+                  // 四炸
+                  case "isboom":
+                    var myaudio = new Audio();
+                    myaudio.src = "/static/audio/isboom.mp3";
+                    myaudio.play();
+                    break;
+                  // 牛牛
+                  case "iscows":
+                    var myaudio = new Audio();
+                    myaudio.src = "/static/audio/iscows.mp3";
+                    myaudio.play();
+                    break;
+                  // 牛1
+                  case "cow1":
+                    var myaudio = new Audio();
+                    myaudio.src = "/static/audio/cow1.mp3";
+                    myaudio.play();
+                    break;
+                  // 牛2
+                  case "cow2":
+                    var myaudio = new Audio();
+                    myaudio.src = "/static/audio/cow2.mp3";
+                    myaudio.play();
+                    break;
+                  // 牛3
+                  case "cow3":
+                    var myaudio = new Audio();
+                    myaudio.src = "/static/audio/cow3.mp3";
+                    myaudio.play();
+                    break;
+                  // 牛4
+                  case "cow4":
+                    var myaudio = new Audio();
+                    myaudio.src = "/static/audio/cow4.mp3";
+                    myaudio.play();
+                    break;
+                  // 牛5
+                  case "cow5":
+                    var myaudio = new Audio();
+                    myaudio.src = "/static/audio/cow5.mp3";
+                    myaudio.play();
+                    break;
+                  // 牛6
+                  case "cow6":
+                    var myaudio = new Audio();
+                    myaudio.src = "/static/audio/cow6.mp3";
+                    myaudio.play();
+                    break;
+                  // 牛7
+                  case "cow7":
+                    var myaudio = new Audio();
+                    myaudio.src = "/static/audio/cow7.mp3";
+                    myaudio.play();
+                    break;
+                  // 牛8
+                  case "cow8":
+                    var myaudio = new Audio();
+                    myaudio.src = "/static/audio/cow8.mp3";
+                    myaudio.play();
+                    break;
+                  // 牛9
+                  case "cow9":
+                    var myaudio = new Audio();
+                    myaudio.src = "/static/audio/cow9.mp3";
+                    myaudio.play();
+                    break;
+                }
+
                 var which = this.getseat(msgRes.data.uid, false);
                 this.flapClist[which].type = msgRes.data.type;
                 this.flapClist[which].hint = msgRes.data.hint;
@@ -485,7 +585,7 @@ export default {
             }
             // 结束游戏
             else if (msgRes.eventType == "endgame") {
-              console.log(msgRes.eventType)
+              console.log(msgRes.eventType);
               let endindex = this.endgame.indexOf(msgRes.data.uid);
               if (endindex == -1) {
                 this.endgame.push(msgRes.data.uid);
@@ -493,11 +593,11 @@ export default {
             }
           }
         };
-       
+
         // 连接关闭的回调方法
         this.websocket.onclose = res => {
           console.log(event);
-          
+
           // alert(JSON.parse(event.data))
           if (event.data) {
             var data = JSON.parse(event.data);
@@ -508,7 +608,7 @@ export default {
               room_id: this.roomID,
               seat_id: this.seatId
             };
-           
+
             // 退出房间
             // uni.request({
             //   url: requestUrl.exitRoom,
@@ -523,7 +623,7 @@ export default {
             //     }
             //   }
             // });
-            H5Interactive.exit_room() //退出房间
+            H5Interactive.exit_room(); //退出房间
           }
         };
 
@@ -654,7 +754,7 @@ export default {
         this.ishowlast = false;
         this.coutdownmsg = "";
         this.isFlop = true;
-        this.flopTime();//开牌倒计时
+        this.flopTime(); //开牌倒计时
       }
     },
     // 监听是否所有玩家都开完牌--判断输赢
@@ -666,33 +766,31 @@ export default {
     },
     // 监听是否所有玩家都结束--新一局准备
     endgame() {
-      var _this=this;
+      var _this = this;
       if (_this.endgame.length == _this.shouldAniList.length) {
         console.log("全部结束");
-        _this.nowmsg ='即将开始下一局';
-        _this.isLeave=true;
-        setTimeout(function(){
-          
+        _this.nowmsg = "即将开始下一局";
+        _this.isLeave = true;
+        setTimeout(function() {
           var websocket = _this.websocket;
           var userId = _this.userID;
           var userToken = _this.token;
           var roomId = _this.roomID;
           var seatId = _this.seatId;
-          var originuser=_this.originUsers;
-          var myuser=_this.myUser;
-          var userlist=_this.usersList;
+          var originuser = _this.originUsers;
+          var myuser = _this.myUser;
+          var userlist = _this.usersList;
           Object.assign(_this.$data, _this.$options.data());
-          _this.websocket=websocket;
-          _this.userID=userId;
-          _this.token=userToken;
-          _this.roomID=roomId;
-          _this.seatId=seatId;
-          _this.originUsers=originuser;
-          _this.myUser=myuser;
-          _this.usersList=userlist;
+          _this.websocket = websocket;
+          _this.userID = userId;
+          _this.token = userToken;
+          _this.roomID = roomId;
+          _this.seatId = seatId;
+          _this.originUsers = originuser;
+          _this.myUser = myuser;
+          _this.usersList = userlist;
           _this.readyFn();
-        },8000)
-       
+        }, 8000);
       }
     }
   },
@@ -706,14 +804,15 @@ export default {
             if (list[i].userId == winloselist[j].userId) {
               winloselist[j].win = list[i].iswin;
               winloselist[j].goldcoin = list[i].goldCoin;
-              winloselist[j].goldCoin = parseInt(winloselist[j].goldCoin)+parseInt(list[i].goldCoin);
+              winloselist[j].goldCoin =
+                parseInt(winloselist[j].goldCoin) + parseInt(list[i].goldCoin);
             }
           }
         }
       }
       this.winLose = winloselist;
-      console.log(winloselist)
-      this.usersList=winloselist;
+      console.log(winloselist);
+      this.usersList = winloselist;
       this.userInfokey = this.userInfokey + 1;
       console.log(winloselist);
       this.websocket.send(
@@ -836,20 +935,20 @@ export default {
       }
       console.log(settlelist);
       if (this.userID == this.bankerId) {
-      		uni.request({
-      			url: requestUrl.finishGame,
-      			method: 'POST',
-      			data: JSON.stringify(settlelist),
-      			header: {
-      				'Content-Type': 'application/json'
-      			},
-      			success: (res) => {
-      				console.log(res.data);
-      			}
-      		});
-      	}
+        uni.request({
+          url: requestUrl.finishGame,
+          method: "POST",
+          data: JSON.stringify(settlelist),
+          header: {
+            "Content-Type": "application/json"
+          },
+          success: res => {
+            console.log(res.data);
+          }
+        });
+      }
     },
-    
+
     // 翻牌倒计时定时器
     flopTime() {
       this.floptime = this.timer;
@@ -870,22 +969,28 @@ export default {
       var result = this.judgeCards(list);
       console.log(result);
       var text = "无牛";
+      var audioname = "nocows"; //对应音频名字
       var double = 1;
       if (result.status) {
         if (result.kindvalue == 6) {
           text = "五花X3";
           double = 3;
+          audioname = "is5flower";
         } else if (result.kindvalue == 5) {
           text = "五小X3";
           double = 3;
+          audioname = "is5small";
         } else if (result.kindvalue == 4) {
           text = "四炸X3";
           double = 3;
+          audioname = "isboom";
         } else if (result.kindvalue == 3) {
           text = "牛牛X3";
           double = 3;
+          audioname = "iscows";
         } else if (result.kindvalue == 2) {
           var cow = result.cardKind.split("cow")[1];
+          audioname = "cow" + cow;
           if (cow >= 7) {
             text = "牛" + cow + "X2";
             double = 2;
@@ -906,7 +1011,8 @@ export default {
               type: result.kindvalue,
               hint: text,
               result: result,
-              double: double
+              double: double,
+              audioname: audioname
             }
           }
         })
@@ -940,40 +1046,39 @@ export default {
       if (str) {
         this.userID = str.split(",")[0].split("=")[1];
         this.token = str.split(",")[1].split("=")[1];
-         this.roomID = str.split(",")[2].split("=")[1];
-         this.seat_id = str.split(",")[3].split("=")[1];
+        this.roomID = str.split(",")[2].split("=")[1];
+        this.seat_id = str.split(",")[3].split("=")[1];
         //  alert(str)
-      }else{
-         // ----
-      //测试用后期删除 start--------
-      let tokenlist = [
-        "",
-        "9383c08eed1644b58055c68e9341e172",
-        "9383c08eed1644b58055c68e9341e177",
-        "304b957948a34c4594b41f0beda38d62",
-        "304b957948a34c4594b41f0beda38d86",
-        "9383c08eed1644b58055c68e9341e174",
-        "bf4ffbc973274308ad6312381160f697",
-        "9df401483eff4d5b805f5f0259e68412",
-        "2276e9f4dfb54afcad1425846cb05140",
-        "",
-        "fed18676bc4e47e5bd27964aa54f86f5",
-      "4c6b968a92ed4b459b679ac54ce40761"
-      ];
+      } else {
+        // ----
+        //测试用后期删除 start--------
+        let tokenlist = [
+          "",
+          "9383c08eed1644b58055c68e9341e172",
+          "9383c08eed1644b58055c68e9341e177",
+          "304b957948a34c4594b41f0beda38d62",
+          "304b957948a34c4594b41f0beda38d86",
+          "9383c08eed1644b58055c68e9341e174",
+          "bf4ffbc973274308ad6312381160f697",
+          "9df401483eff4d5b805f5f0259e68412",
+          "2276e9f4dfb54afcad1425846cb05140",
+          "",
+          "fed18676bc4e47e5bd27964aa54f86f5",
+          "4c6b968a92ed4b459b679ac54ce40761"
+        ];
 
-      this.userID = location.search
-        .split("?")[1]
-        .split("&")[0]
-        .split("=")[1];
-      this.seatId = location.search
-        .split("?")[1]
-        .split("&")[1]
-        .split("=")[1];
-      this.token = tokenlist[this.userID];
+        this.userID = location.search
+          .split("?")[1]
+          .split("&")[0]
+          .split("=")[1];
+        this.seatId = location.search
+          .split("?")[1]
+          .split("&")[1]
+          .split("=")[1];
+        this.token = tokenlist[this.userID];
 
-      //测试用后期删除 end--------
+        //测试用后期删除 end--------
       }
-     
 
       if (this.userID && this.roomID) {
         // 获取用户信息后连接websocket
@@ -1084,13 +1189,19 @@ export default {
         this.isShowAni.push(false);
         newShowArr.push(false);
       });
-
+      //创建音频
+      this.audio = new Audio();
+      this.audio.src = this.mp3;
+      this.audio.loop = true;
+      // 播放音频
+      this.audio.play();
       let sendCardTimer = setInterval(() => {
         if (nowCardLength >= this.shouldAniList.length * 5 - 1) {
           clearInterval(sendCardTimer);
           // 最后一个动画结束后隐藏动画
           let aniOverTimer = setTimeout(() => {
             this.isAni = false;
+            this.audio.pause();
           }, 300);
         }
 
@@ -1288,8 +1399,8 @@ export default {
 
       if (sum > this.bankerBet) {
         this.hintmsg = "下注超出";
-      }else if(type==0){
-         this.hintmsg = "下注不能为0";
+      } else if (type == 0) {
+        this.hintmsg = "下注不能为0";
       } else {
         this.hintmsg = "";
         this.websocket.send(
@@ -1339,10 +1450,10 @@ export default {
       if (this.isLeave && this.websocket) {
         console.log("back");
         this.websocket.close();
-        }else if(!this.websocket){
-        	H5Interactive.exit_room()   //退出房间
-        }else{
-        	// alert('不可以')
+      } else if (!this.websocket) {
+        H5Interactive.exit_room(); //退出房间
+      } else {
+        // alert('不可以')
       }
     }
   }
@@ -1721,8 +1832,8 @@ export default {
       button {
         padding: 0.05rem 0.26rem;
       }
-      .flopbtn{
-        padding:0.05rem 0.1rem;
+      .flopbtn {
+        padding: 0.05rem 0.1rem;
       }
     }
   }
@@ -1754,7 +1865,7 @@ export default {
       margin-top: -0.25rem;
       p {
         border: 0.02rem solid #ffe400;
-        background:#ffe400;
+        background: #ffe400;
         text-align: center;
         color: #fff;
         margin: 0 0.1rem;
@@ -1878,9 +1989,9 @@ export default {
   white-space: nowrap;
   max-width: 0.5rem;
 }
-.test{
-  position:fixed;
-  right:0.5rem;
-  top:0
+.test {
+  position: fixed;
+  right: 0.5rem;
+  top: 0;
 }
 </style>
