@@ -247,7 +247,7 @@ export default {
       // 原生传入的当前用户的信息
       userID: "", // 当前页面的userID
       token: "", // 当前页面的token
-      roomID: "2001", // 当前房间号
+      roomID: "", // 当前房间号---------------------
       seatId: "", //用户的座位号
       // 我的信息相关
       myUser: null, // 我的用户信息
@@ -624,6 +624,7 @@ export default {
             //   }
             // });
             H5Interactive.exit_room(); //退出房间
+            H5Interactive.exit_room_Cattle_flower(this.roomID.toString(), this.seatId.toString()); //退出房间接口
           }
         };
 
@@ -1076,7 +1077,7 @@ export default {
           .split("&")[1]
           .split("=")[1];
         this.token = tokenlist[this.userID];
-
+        this.roomID='2001' 
         //测试用后期删除 end--------
       }
 
@@ -1448,12 +1449,12 @@ export default {
     //退出房间
     exitRoomFn() {
       if (this.isLeave && this.websocket) {
-        console.log("back");
         this.websocket.close();
       } else if (!this.websocket) {
         H5Interactive.exit_room(); //退出房间
+        H5Interactive.exit_room_Cattle_flower(this.roomID.toString(), this.seatId.toString()); //退出房间接口
       } else {
-        // alert('不可以')
+        
       }
     }
   }
