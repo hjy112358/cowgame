@@ -13,8 +13,8 @@
 // 五小：先比点数，单张比最小还是最大？？？
 
 function follow(lastype, yourtype) {
-	console.log(lastype);
-	console.log(yourtype)
+	// console.log(lastype);
+	// console.log(yourtype)
 
 	// 牌型一致
 	if(lastype.cardKind==yourtype.cardKind){

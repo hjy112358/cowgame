@@ -1,9 +1,11 @@
 <template>
   <view class="content">
-    <!-- <view class="test">
-      <p>{{userID}}</p>
-      <p>{{seatId}}</p>
-    </view>-->
+    <view class="test">
+      <p>ID：{{userID}}</p>
+      <p>座位：{{seatId}}</p>
+       <p>场次：{{sessions}}</p>
+      <p>积分：{{integral}}</p>
+    </view>
     <!-- 返回 -->
     <view class="back" @tap="exitRoomFn()">
       <img src="../../static/image/back.png" />
@@ -150,7 +152,7 @@
 
     <!-- 底分 -->
     <div class="showDi">
-      <p>底分:{{bottomScore}}</p>
+      <p>底分:{{bottomScore}}  积分:{{integral}}</p>
     </div>
     <!-- 翻牌 -->
     <div class="optionsbox" v-show="isFlop" @tap="flop(showCardsList[4])">
@@ -227,6 +229,14 @@
         </transition>
       </div>
     </div>
+
+    <!-- 金币不够提示退出房间 -->
+    <view class="noEnoughbox" v-show="isenougn">
+      <view class="noEnough">
+        <text>您当前金币不足以在本场次继续游戏，请退出后进入其他场次或者充值后继续游戏</text>
+        <button @tap="exitRoomFn()">确定({{ leaveTime }}s)</button>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -239,7 +249,6 @@ import RangeSlider from "../../components/range-slider/range-slider.vue";
 export default {
   data() {
     return {
-      // 模拟数据
       originUsers: [], // 所有用户信息列表
       originCards: null, // 所有用户的牌面列表
       playUserslen: 0, //玩家人数
@@ -247,7 +256,7 @@ export default {
       // 原生传入的当前用户的信息
       userID: "", // 当前页面的userID
       token: "", // 当前页面的token
-      roomID: "", // 当前房间号---------------------
+      roomID: "", // 当前房间号
       seatId: "", //用户的座位号
       // 我的信息相关
       myUser: null, // 我的用户信息
@@ -273,11 +282,13 @@ export default {
       isShowAni: [], // 每张牌的动画是否显示列表
       aniFinish: [], // 记录玩家是否发完牌
 
-      // 基础参数---需后台获取
-      bottomScore: 100, //底分
-      doublelist: [1, 2, 3, 4], //抢庄倍数参数
-      betlist: [10, 20, 30], //下注参数
+      // 基础参数
+      bottomScore: 0, //底分
+      doublelist: [], //抢庄倍数参数
+      betlist: [], //下注参数
       isLeave: true, //是否可以离开
+      sessions: "", //场次 1初级场 2 中级场 3 高级场 4 大市场
+      integral: "", //积分值
 
       // 操作
       coutdownmsg: "", //当前操作名称
@@ -285,7 +296,7 @@ export default {
       timer: 15, //倒计时时间
       nowmsg: "", //当前操作名称显示
       isFlop: false, //是否翻牌
-      beginTime: "", //游戏开始时间---结算需要的参数
+      beginTime: "", //游戏开始时间
       endgame: [], //结束游戏的用户id
 
       // 抢庄
@@ -333,7 +344,12 @@ export default {
 
       // 音频
       audio: null,
-      mp3: "/static/f.mp3" //发牌
+      mp3: "/static/f.mp3", //发牌
+
+      // 显示金币不够
+      leaveTime: 10, //金币不够退出房间的倒计时
+      isenougn: false,
+      waitLeave: null
     };
   },
   components: {
@@ -349,7 +365,7 @@ export default {
     // 从原生获取
     window.getUserInfo = this.getUserInfo;
     window.exitRoomFn = this.exitRoomFn;
-    this.getUserInfo();
+    // this.getUserInfo();
   },
   filters: {
     moneyFilter(value) {
@@ -387,7 +403,7 @@ export default {
           // console.log("websocket连接成功");
           // 连接成功后开始准备倒计时
           // ----
-          this.readyFn();
+          // this.readyFn();
         };
         // websocket连接接受消息
         this.websocket.onmessage = event => {
@@ -487,6 +503,7 @@ export default {
               if (flapindex == -1) {
                 this.flaps.push(msgRes.data.uid);
                 console.log(msgRes.data.audioname);
+
                 switch (msgRes.data.audioname) {
                   // 无牛
                   case "nocows":
@@ -624,7 +641,10 @@ export default {
             //   }
             // });
             H5Interactive.exit_room(); //退出房间
-            H5Interactive.exit_room_Cattle_flower(this.roomID.toString(), this.seatId.toString()); //退出房间接口
+            H5Interactive.exit_room_Cattle_flower(
+              parseInt(this.roomID),
+              parseInt(this.seatId)
+            ); //退出房间接口
           }
         };
 
@@ -768,7 +788,10 @@ export default {
     // 监听是否所有玩家都结束--新一局准备
     endgame() {
       var _this = this;
-      if (_this.endgame.length == _this.shouldAniList.length) {
+      if (
+        _this.endgame.length == _this.shouldAniList.length &&
+        !this.isenougn
+      ) {
         console.log("全部结束");
         _this.nowmsg = "即将开始下一局";
         _this.isLeave = true;
@@ -781,6 +804,11 @@ export default {
           var originuser = _this.originUsers;
           var myuser = _this.myUser;
           var userlist = _this.usersList;
+          var bottomscore = _this.bottomScore; //底分
+          var doublelist = _this.doublelist; //抢庄倍数参数
+          var belist = _this.betlist; //下注参数
+          var sessions = _this.sessions; //场次
+          var intetral = _this.integral; //积分
           Object.assign(_this.$data, _this.$options.data());
           _this.websocket = websocket;
           _this.userID = userId;
@@ -790,6 +818,11 @@ export default {
           _this.originUsers = originuser;
           _this.myUser = myuser;
           _this.usersList = userlist;
+          _this.bottomScore = bottomscore; //底分
+          _this.doublelist = doublelist; //抢庄倍数参数
+          _this.betlist = belist; //下注参数
+          _this.sessions = sessions; //场次
+          _this.integral = intetral; //积分
           _this.readyFn();
         }, 8000);
       }
@@ -807,10 +840,18 @@ export default {
               winloselist[j].goldcoin = list[i].goldCoin;
               winloselist[j].goldCoin =
                 parseInt(winloselist[j].goldCoin) + parseInt(list[i].goldCoin);
+              if (
+                parseInt(winloselist[j].goldCoin) < parseInt(this.integral) &&
+                winloselist[j].userId == this.userID
+              ) {
+                this.isenougn = true;
+                this.waitleaveinterval();
+              }
             }
           }
         }
       }
+
       this.winLose = winloselist;
       console.log(winloselist);
       this.usersList = winloselist;
@@ -828,6 +869,20 @@ export default {
           }
         })
       );
+    },
+    // 显示金币不够操作显示倒计时
+    waitleaveinterval() {
+      var _this = this;
+      _this.leaveTime = 5;
+      _this.waitLeave = setInterval(function() {
+        _this.leaveTime--;
+        if (_this.leaveTime == 0) {
+          clearInterval(_this.waitLeave);
+          _this.isLeave = true;
+          _this.isenougn = false;
+          _this.exitRoomFn();
+        }
+      }, 1000);
     },
     // 结算
     settle() {
@@ -851,7 +906,7 @@ export default {
           }
         }
       }
-      console.log(resultlist);
+
       // 比牌并排序
       for (var i = resultlist.length - 1; i > 0; i--) {
         for (var j = 0; j < i; j++) {
@@ -859,7 +914,7 @@ export default {
             resultlist[j].result,
             resultlist[j + 1].result
           );
-          console.log(follow);
+          // console.log(follow);
           if (follow) {
             [resultlist[j], resultlist[j + 1]] = [
               resultlist[j + 1],
@@ -868,6 +923,7 @@ export default {
           }
         }
       }
+      console.log(resultlist);
       if (resultlist[resultlist.length - 1].userId == this.bankerId) {
         // 庄家赢
         var double = resultlist[resultlist.length - 1].double;
@@ -1043,12 +1099,59 @@ export default {
     },
     // 从原生获取用户信息
     getUserInfo(str) {
-      // 判断当前用户登录是否有问题
+  
       if (str) {
         this.userID = str.split(",")[0].split("=")[1];
         this.token = str.split(",")[1].split("=")[1];
         this.roomID = str.split(",")[2].split("=")[1];
-        this.seat_id = str.split(",")[3].split("=")[1];
+        this.seatId = str.split(",")[3].split("=")[1];
+        this.sessions = str.split(",")[4].split("=")[1];
+        this.integral = str.split(",")[5].split("=")[1];
+        var keyword = "poker4_vip" + this.sessions;
+
+        // 获取基础参数
+        uni.request({
+          url: requestUrl.baseConfig,
+          method: "POST",
+          data: {
+            keyword: keyword
+          },
+          header: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          success: res => {
+            if (res.data.success) {
+              console.log(res.data.data);
+              var baseconfig = res.data.data;
+              this.bottomScore =
+                baseconfig["poker4_vip" + this.sessions + "_difen"]; //底分
+              this.doublelist.push(
+                parseInt(baseconfig["poker4_vip" + this.sessions + "_q1"])
+              ); //倍数
+              this.doublelist.push(
+                parseInt(baseconfig["poker4_vip" + this.sessions + "_q2"])
+              ); //倍数
+              this.doublelist.push(
+                parseInt(baseconfig["poker4_vip" + this.sessions + "_q3"])
+              ); //倍数
+              this.doublelist.push(
+                parseInt(baseconfig["poker4_vip" + this.sessions + "_q4"])
+              ); //倍数
+
+              this.betlist.push(
+                parseInt(baseconfig["poker4_vip" + this.sessions + "_j1"])
+              ); //下注
+              this.betlist.push(
+               parseInt(baseconfig["poker4_vip" + this.sessions + "_j2"])
+              ); //下注
+              this.betlist.push(
+                parseInt(baseconfig["poker4_vip" + this.sessions + "_j3"])
+              ); //下注
+              console.log(this.doublelist);
+              console.log(this.betlist);
+            }
+          }
+        });
         //  alert(str)
       } else {
         // ----
@@ -1077,7 +1180,53 @@ export default {
           .split("&")[1]
           .split("=")[1];
         this.token = tokenlist[this.userID];
-        this.roomID='2001' 
+        this.roomID = "2001";
+        this.sessions=1;
+        this.integral=9000;
+            var keyword = "poker4_vip" + this.sessions;
+      uni.request({
+        url: requestUrl.baseConfig,
+        method: "POST",
+        data: {
+          keyword: keyword
+        },
+        header: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        success: res => {
+          if (res.data.success) {
+            var baseconfig = res.data.data;
+            console.log(baseconfig);
+
+            this.bottomScore =
+              baseconfig["poker4_vip" + this.sessions + "_difen"]; //底分
+           this.doublelist.push(
+                parseInt(baseconfig["poker4_vip" + this.sessions + "_q1"])
+              ); //倍数
+              this.doublelist.push(
+                parseInt(baseconfig["poker4_vip" + this.sessions + "_q2"])
+              ); //倍数
+              this.doublelist.push(
+                parseInt(baseconfig["poker4_vip" + this.sessions + "_q3"])
+              ); //倍数
+              this.doublelist.push(
+                parseInt(baseconfig["poker4_vip" + this.sessions + "_q4"])
+              ); //倍数
+
+              this.betlist.push(
+                parseInt(baseconfig["poker4_vip" + this.sessions + "_j1"])
+              ); //下注
+              this.betlist.push(
+               parseInt(baseconfig["poker4_vip" + this.sessions + "_j2"])
+              ); //下注
+              this.betlist.push(
+                parseInt(baseconfig["poker4_vip" + this.sessions + "_j3"])
+              ); //下注
+            console.log(this.doublelist);
+            console.log(this.betlist);
+          }
+        }
+      });
         //测试用后期删除 end--------
       }
 
@@ -1157,6 +1306,7 @@ export default {
       clearInterval(this.readyTimer);
       this.readyTimer = setInterval(() => {
         if (this.readyTime <= 1) {
+        
           clearInterval(this.readyTimer);
           this.exitRoomFn();
         }
@@ -1452,10 +1602,13 @@ export default {
         this.websocket.close();
       } else if (!this.websocket) {
         H5Interactive.exit_room(); //退出房间
-        H5Interactive.exit_room_Cattle_flower(this.roomID.toString(), this.seatId.toString()); //退出房间接口
+        H5Interactive.exit_room_Cattle_flower(
+          parseInt(this.roomID),
+          parseInt(this.seatId)
+        ); //退出房间接口
       } else {
-        
       }
+      console.log("tc");
     }
   }
 };
@@ -1474,6 +1627,42 @@ export default {
   width: 100vw;
   height: 100vh;
   position: relative;
+  /* 豆子不够 */
+  .noEnoughbox {
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    .noEnough {
+      width: 3.38rem;
+      height: 2.09rem;
+      background: #fff;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      background: url(../../static/image/hint.png) no-repeat;
+      background-size: 100% 100%;
+      text-align: center;
+      text {
+        font-size: 0.18rem;
+        display: block;
+        margin: 0 auto;
+        margin-top: 0.8rem;
+        color: #b45000;
+      }
+      button {
+        display: inline-block;
+        padding: 0.06rem 0.1rem;
+        margin-top: 0.15rem;
+      }
+    }
+  }
+
   .back {
     position: absolute;
     left: 0.1rem;
